@@ -19,15 +19,21 @@ public class camera : MonoBehaviour
     }
     void Update()
     {
-        currentx = currentRotation.y + Input.GetAxis("Mouse X") * sensitivity; 
+        currentx = currentRotation.y + Input.GetAxis("Mouse X") * sensitivity;
         currentRotation.y += Input.GetAxis("Mouse X") * sensitivity;
         if (currentRotation.y > 0) currentRotation.y -= 360;
         currentRotation.x -= Input.GetAxis("Mouse Y") * sensitivity;
         currentRotation.x = Mathf.Clamp(currentRotation.x, -maxYAngle, maxYAngle);
         //currentRotation = Vector3.SmoothDamp(Camera.main.transform.rotation)
-         Camera.main.transform.localRotation = Quaternion.Euler(currentRotation.x, -currentRotation.y, 0);
-        float R = radius *Mathf.Cos(currentRotation.x * Mathf.Deg2Rad) + x_offset;
+        Camera.main.transform.localRotation = Quaternion.Euler(currentRotation.x, -currentRotation.y, 0);
+        float R = radius * Mathf.Cos(currentRotation.x * Mathf.Deg2Rad) + x_offset;
         float angle = (currentx - 90) * Mathf.Deg2Rad;
-        Camera.main.transform.transform.localPosition = new Vector3(R*Mathf.Cos(angle),y_radius*Mathf.Sin(currentRotation.x*Mathf.Deg2Rad)+y_offset, R * Mathf.Sin(angle));
+        Vector3 new_pos = new Vector3(R * Mathf.Cos(angle), y_radius * Mathf.Sin(currentRotation.x * Mathf.Deg2Rad) + y_offset, R * Mathf.Sin(angle));
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.TransformDirection(new_pos), out hit))
+        {
+            Camera.main.transform.localPosition = Camera.main.transform.InverseTransformDirection(hit.transform.position);
+        }
+        else Camera.main.transform.localPosition = new_pos;
     }
 }
