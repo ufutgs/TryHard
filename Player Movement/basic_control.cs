@@ -43,6 +43,11 @@ public class basic_control : MonoBehaviour
     {
         float angle =Mathf.Atan2(input.y,input.x);
         Vector2 temp = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+        float cam_rotation = -Camera.main.transform.rotation.eulerAngles.y*Mathf.Deg2Rad;
+        temp = new Vector2(temp.x * Mathf.Cos(cam_rotation) - temp.y * Mathf.Sin(cam_rotation),
+                          temp.x * Mathf.Sin(cam_rotation) + temp.y * Mathf.Cos(cam_rotation));
+        if(input.magnitude>=0.9)
+            transform.rotation = Quaternion.Euler(new Vector3(0, -cam_rotation * Mathf.Rad2Deg, 0));
         return table[(int) state,0]*temp;
     }
                 
@@ -55,7 +60,7 @@ public class basic_control : MonoBehaviour
         new_v = (max_velocity< new_v.magnitude) ? new_v*(max_velocity/new_v.magnitude) : new_v;// how to scale A such that cur_v + A .mag == max;
         return new Vector3(new_v.x, normal*Time.deltaTime+cur_v.y, new_v.y);
     }
-     void OnCollisionEnter(Collision collision)
+/*     void OnCollisionEnter(Collision collision)
     {
         normal = 9.81f;
     }
@@ -64,5 +69,5 @@ public class basic_control : MonoBehaviour
     {
         normal = 0f;
         Debug.Log("ca");
-    }
+    }*/
 }
