@@ -8,7 +8,7 @@ public class camera : MonoBehaviour
     public float maxYAngle = 90f;
     public float radius = 8f;
     private float x_offset = 1f;
-    private float y_offset = 0f;
+    private float y_offset = 3.5f;
     private Vector3 currentRotation;
     public GameObject lookAt;
     private Vector3 previous;
@@ -32,12 +32,12 @@ public class camera : MonoBehaviour
 
         CircleAround();
         future_camera.position = previous + lookAt.transform.position;
-        Vector3 Y_dir = new Vector3(0, transform.position.y - future_camera.position.y, 0).normalized;
+        Vector3 Y_dir = new Vector3(0, transform.position.y - future_camera.position.y, 0);
         RaycastHit hit;
-        if (Physics.Raycast(future_camera.position, Y_dir,out hit, Vector3.Distance(future_camera.position, transform.position), wall))
+        Debug.DrawRay(future_camera.position, (transform.position - future_camera.position), Color.red,1);
+        if (Physics.Linecast(future_camera.position,transform.position,out hit, wall))
         {
-            Debug.DrawRay(future_camera.position, hit.point, Color.green);
-            future_camera.position = new Vector3(future_camera.position.x, hit.point.y + Y_dir.y*0.1f , future_camera.position.z);
+            future_camera.position = new Vector3(future_camera.position.x, hit.point.y + Y_dir.normalized.y*0.1f , future_camera.position.z);
         }
         future_camera.LookAt(lookAt.transform);
         /*Ray[] raylist = mapping(Camera.main.transform);
