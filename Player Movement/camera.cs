@@ -5,15 +5,15 @@ using System.Linq;
 public class camera : MonoBehaviour
 {
     public float sensitivity = 5f;
-    public float maxYAngle = 90f;
+    public float maxYAngle = 80f;
     public float radius = 8f;
-    private float x_offset = 1f;
-    private float y_offset = 3.5f;
+    public float x_offset = 1f;
+    public float y_offset = 3f;
     private Vector3 currentRotation;
-    public GameObject lookAt;
+    public Transform lookAt;
     private Vector3 previous;
     private LayerMask wall;
-    public Transform future_camera;
+
 
     // Start is called before the first frame update
     void Start()
@@ -29,29 +29,13 @@ public class camera : MonoBehaviour
     }
     void Update()
     {
-
+        
         CircleAround();
-        future_camera.position = previous + lookAt.transform.position;
-        Vector3 Y_dir = new Vector3(0, transform.position.y - future_camera.position.y, 0);
-        RaycastHit hit;
-        Debug.DrawRay(future_camera.position, (transform.position - future_camera.position), Color.red,1);
-        if (Physics.Linecast(future_camera.position,transform.position,out hit, wall))
-        {
-            future_camera.position = new Vector3(future_camera.position.x, hit.point.y + Y_dir.normalized.y*0.1f , future_camera.position.z);
-        }
-        future_camera.LookAt(lookAt.transform);
-        /*Ray[] raylist = mapping(Camera.main.transform);
-        foreach(Ray ray in raylist)
-        {
-            RaycastHit Rhit;
-            Debug.DrawRay(future_camera.position, ray.direction, Color.yellow);
-            if (Physics.Raycast(new_pos, ray.direction, out Rhit,0.1f, wall))
-            {
-                new_pos -= ray.direction.normalized * 0.1f;
-            }
-        }*/
-        transform.position = future_camera.position;
+        Vector3 position = previous + lookAt.position;
+        position = Vector3.MoveTowards(wall_collide(lookAt.position, position),wall_collide(transform.position,position),0.001f);
+        transform.position = position;
         transform.LookAt(lookAt.transform);
+       // transform.rotation = Quaternion.Euler(currentRotation.x, transform.rotation.y, transform.rotation.z);
     }
 
     private void CircleAround()
@@ -67,23 +51,18 @@ public class camera : MonoBehaviour
         previous = new Vector3(R * Mathf.Cos(angle), radius * Mathf.Sin(currentRotation.x * Mathf.Deg2Rad) + y_offset, R * Mathf.Sin(angle));
 
     }
-
-    private Ray[] mapping(Transform cam)
+    /// <param name="start"> start point.</param>
+    /// <param name="end">end point. It is recommend to use future_camera as end.</param>
+    private Vector3 wall_collide(Vector3 start, Vector3 end)
     {
-        return   new Ray[] { new Ray(cam.position, cam.up),
-                 new Ray(cam.position, -cam.up),
-                 new Ray(cam.position, cam.right),
-                 new Ray(cam.position, -cam.right),
-                 new Ray(cam.position, cam.forward),
-                 new Ray(cam.position, -cam.forward)
-    };
+        Vector3 diff = end - start;
+        RaycastHit hit;
+       // Debug.DrawRay(end, (start - end), Color.red, 1);
+        if (Physics.Linecast(start, end, out hit, wall))
+        {
+           return new Vector3(hit.point.x - Mathf.Sign(diff.x) * 0.1f, hit.point.y - Mathf.Sign(diff.y) * 0.1f, hit.point.z - Mathf.Sign(diff.z) * 0.1f);
+        }
+        return end;
     }
 
-    public RaycastHit max(RaycastHit[] list)
-    {
-        RaycastHit h = list[0];
-        foreach (RaycastHit i in list)
-            h = (i.distance > h.distance) ? i : h;
-        return h;
-    }
 }

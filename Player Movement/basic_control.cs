@@ -15,31 +15,35 @@ public class basic_control : MonoBehaviour
     public Movement state;
     private float[,] table = { {100f,10f }, // A, DA, max_V
                                {5f,8f },
-                               {0f,0f },};
+                               {0f,0.3f },};
     
-    private float global_DA = 0;
-    private float normal = 0f;
+    private float global_DA = 1f;
     private Rigidbody rb;
+    private Animator Animator;
     // Start is called before the first frame update
     void Start()
     {
         state = Movement.REST;
         rb = GetComponent<Rigidbody>(); 
+        Animator = GetComponent<Animator>();  
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        float frontwalk = Input.GetAxis("Vertical"); //y
-        float sidewalk = Input.GetAxis("Horizontal");//x 
+        float frontwalk = Input.GetAxisRaw("Vertical"); //y
+        float sidewalk = Input.GetAxisRaw("Horizontal");//x 
         Vector2 input = new Vector2(sidewalk, frontwalk);
+        //change state
         state = (input.magnitude > 0.5) ? Movement.RUN : (input.magnitude <= 0.01) ? Movement.REST : Movement.WALK;
+        if(state==Movement.REST) Animator.SetBool("IsRunning", false); else Animator.SetBool("IsRunning", true);
+        //calculation
         Vector2 acceleration = (input==Vector2.zero) ? Vector2.zero : Acceleration(new Vector2(sidewalk,frontwalk));
         rb.velocity = cal_velocity(acceleration,rb.velocity);
 
     }
 
-    private Vector2 Acceleration(Vector2 input)
+    public Vector2 Acceleration(Vector2 input)
     {
         float angle =Mathf.Atan2(input.y,input.x);
         Vector2 temp = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
@@ -54,11 +58,12 @@ public class basic_control : MonoBehaviour
     private Vector3 cal_velocity(Vector2 A,Vector3 cur_v)
     {
         float max_velocity = table[(int) state,1];
+        if (state == Movement.RUN && (Input.GetKey(KeyCode.LeftShift))) max_velocity *= 1.5f;
         Vector2 v2_cur_v = new Vector2(cur_v.x, cur_v.z);
         Vector2 drag = v2_cur_v.normalized *global_DA;
-        Vector2 new_v = v2_cur_v + (A - drag)*Time.deltaTime ;
+        Vector2 new_v = v2_cur_v + (A-drag)*Time.deltaTime ;
         new_v = (max_velocity< new_v.magnitude) ? new_v*(max_velocity/new_v.magnitude) : new_v;// how to scale A such that cur_v + A .mag == max;
-        return new Vector3(new_v.x, normal*Time.deltaTime+cur_v.y, new_v.y);
+        return new Vector3(new_v.x,cur_v.y, new_v.y);
     }
 /*     void OnCollisionEnter(Collision collision)
     {
