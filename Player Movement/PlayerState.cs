@@ -17,7 +17,6 @@ public class PlayerState : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(rb.velocity.magnitude);
         float frontwalk = Input.GetAxisRaw("Vertical");
         float sidewalk = Input.GetAxisRaw("Horizontal");
         if (frontwalk != 0 || sidewalk != 0)
@@ -59,8 +58,15 @@ public class PlayerState : MonoBehaviour
         float cam_rotation = -Camera.main.transform.rotation.eulerAngles.y * Mathf.Deg2Rad;
         temp = new Vector2(temp.x * Mathf.Cos(cam_rotation) - temp.y * Mathf.Sin(cam_rotation),
                           temp.x * Mathf.Sin(cam_rotation) + temp.y * Mathf.Cos(cam_rotation));
+        Debug.Log(angle * Mathf.Rad2Deg);
         if (input.magnitude >= 0.9)
-            transform.rotation = Quaternion.Euler(new Vector3(0, -cam_rotation * Mathf.Rad2Deg, 0));
+        {
+            float y = -cam_rotation * Mathf.Rad2Deg;
+            float x = Mathf.Sign(input.x) * Mathf.Ceil(Mathf.Abs(input.x)) * 90;
+            float k = (input.y < 0) ? -180 : 0;
+            y +=(input.y<0&&input.x>0) ? -225 : (input.y != 0 && input.x != 0) ? (x + k) / 2 : (input.y != 0) ? k : x;
+            transform.rotation = Quaternion.Euler(new Vector3(0,y, 0));
+        }
         return A * temp;
     }
 
