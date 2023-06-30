@@ -23,13 +23,19 @@ public class PlayerState : MonoBehaviour
         {
             //set all related transtition into true or false
             animator.SetBool("Run", true);
+            if (Input.GetKey(KeyCode.LeftShift))
+                animator.SetBool("Sprint", true);
+            else
+                animator.SetBool("Sprint", false);
+
         }
         else 
         {
             //set all related transtition into true or false
             animator.SetBool("Run", false);
+            animator.SetBool("Sprint", false);
         }
-        for(int i = 0; i<keybind.Length;i++)
+        /*for(int i = 0; i<keybind.Length;i++)
         {
             if (Input.GetKey(keybind[i]))
             {
@@ -39,7 +45,7 @@ public class PlayerState : MonoBehaviour
             {
                 animator.SetBool(table[i], false);
             }
-        }
+        }*/
         
     }
     public void Moving(float max_speed,float A)
